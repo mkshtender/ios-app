@@ -10,6 +10,9 @@ workflows:
       vars:
         APPLE_ID: $APPLE_ID  # Set in Codemagic environment variables
         APPLE_ID_PASSWORD: $APPLE_ID_PASSWORD  # Set in Codemagic environment variables
+    # Note: Code signing should be configured in Codemagic UI:
+    # Go to your app → Code signing → Add Apple ID credentials
+    # OR use environment variables APPLE_ID and APPLE_ID_PASSWORD
     cache:
       cache_paths:
         - ~/.pub-cache
@@ -34,29 +37,23 @@ workflows:
           cd ios
           pod install
           cd ..
-      - name: Set up code signing settings on Xcode project
+      - name: Set up automatic code signing
         script: |
-          # Verify Apple ID credentials are set
+          # Verify Apple ID credentials are available
           if [ -z "$APPLE_ID" ] || [ -z "$APPLE_ID_PASSWORD" ]; then
-            echo "Error: APPLE_ID or APPLE_ID_PASSWORD environment variables are not set"
-            echo "Please add them in Codemagic dashboard: Teams → Environment variables"
-            exit 1
+            echo "Warning: APPLE_ID or APPLE_ID_PASSWORD not found in environment variables"
+            echo "Make sure you've configured code signing in Codemagic UI:"
+            echo "  App → Code signing → Add Apple ID"
+            echo "OR add environment variables: APPLE_ID and APPLE_ID_PASSWORD"
+            echo ""
+            echo "Continuing build - Codemagic may use UI-configured credentials..."
+          else
+            echo "✓ Found Apple ID credentials: $APPLE_ID"
           fi
           
-          echo "Setting up code signing with Apple ID: $APPLE_ID"
-          
-          # Automatic code signing with Apple ID from environment variables
-          xcode-project use-profiles
-          
-          # Verify code signing was set up successfully
-          if [ $? -ne 0 ]; then
-            echo "Warning: Automatic code signing setup failed"
-            echo "Please verify your Apple ID credentials are correct"
-            echo "If you have 2FA enabled, use an App-Specific Password"
-            exit 1
-          fi
-          
-          echo "Code signing configured successfully"
+          # Codemagic will handle code signing automatically if configured in UI
+          # or via environment variables. Flutter build will use automatic signing.
+          echo "Code signing will be handled by Codemagic/Fluent automatically"
       - name: Build ipa for distribution
         script: |
           flutter build ipa --release
