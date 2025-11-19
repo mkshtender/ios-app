@@ -32,30 +32,58 @@ This guide will help you set up Codemagic CI/CD for your Flutter iOS app so you 
    - Since you have `codemagic.yaml` in your repository root, Codemagic will automatically use it
    - You'll see the workflow defined in the file
 
-## Step 3: Configure Code Signing (Required for iOS)
+## Step 3: Configure Code Signing (Required for iOS) ⚠️
 
-iOS apps require code signing. You have two options:
+**This is the most important step!** iOS apps cannot be built without code signing.
 
-### Option A: Automatic Code Signing (Easiest - Free Apple ID)
+### Option A: Automatic Code Signing with Apple ID (Easiest - Free Apple ID)
 
-1. **In Codemagic dashboard:**
-   - Go to your app settings
-   - Navigate to "Code signing" section
-   - Click "Add credentials"
+**Step-by-step instructions:**
 
-2. **Add your Apple ID:**
-   - Enter your Apple ID email
-   - Enter your Apple ID password
-   - Codemagic will handle code signing automatically
+1. **Get your App Bundle Identifier:**
+   - Open `ios/Runner/Info.plist` in your project
+   - Find the `CFBundleIdentifier` value (or check `ios/Runner.xcodeproj`)
+   - It should look like: `com.example.iosapp` or `com.yourname.iosapp`
+   - **Note this down** - you'll need it
 
-3. **Create Environment Variable Group:**
-   - Go to "Teams" > "Environment variables"
-   - Create a new group called `ios_code_signing`
-   - Add your Apple ID credentials:
-     - `APPLE_ID` - Your Apple ID email
-     - `APPLE_ID_PASSWORD` - Your Apple ID password (or app-specific password)
+2. **In Codemagic Dashboard:**
+   - Go to your app (click on it in the dashboard)
+   - Click on **"Code signing"** in the left sidebar
+   - You'll see options for iOS code signing
 
-**Note:** For free Apple IDs, apps expire after 7 days. For production, you'll need a paid Apple Developer account ($99/year).
+3. **Add Apple ID Credentials:**
+   - Click **"Add credentials"** or **"Add Apple ID"**
+   - Enter your **Apple ID email** (the one you use for iCloud/App Store)
+   - Enter your **Apple ID password**
+   - **Important:** If you have 2FA enabled (most accounts do), you need to create an **App-Specific Password**:
+     - Go to https://appleid.apple.com/
+     - Sign in → Security → App-Specific Passwords
+     - Generate a new password for "Codemagic"
+     - Use this password instead of your regular password
+
+4. **Add Environment Variables:**
+   - Go to **"Teams"** → **"Environment variables"** (or **"Settings"** → **"Environment variables"**)
+   - Click **"Add group"** or select your team
+   - Add these variables:
+     - **Variable name:** `APPLE_ID`
+     - **Value:** Your Apple ID email
+     - **Variable name:** `APPLE_ID_PASSWORD`
+     - **Value:** Your Apple ID password (or app-specific password)
+     - **Variable name:** `APP_ID`
+     - **Value:** Your app bundle identifier (from step 1, e.g., `com.example.iosapp`)
+   - Make sure these are **not** encrypted if you want them visible (or encrypt if you prefer)
+   - **Save** the variables
+
+5. **Link Variables to Your App:**
+   - Go back to your app settings
+   - Go to **"Environment variables"** section
+   - Make sure the variables you created are available to your workflow
+   - The workflow will automatically use them
+
+**Note:** 
+- For free Apple IDs, apps expire after 7 days
+- For production, you'll need a paid Apple Developer account ($99/year)
+- The first build might take longer as Codemagic sets up certificates
 
 ### Option B: Manual Code Signing (Paid Developer Account)
 
@@ -152,12 +180,47 @@ Here's what happens when you push code:
 
 ## Troubleshooting
 
-### Build Fails: "Code signing required"
+### Build Fails: "Code signing required" or "Failed to set code signing settings"
 
-**Solution:**
-- Make sure you've added code signing credentials in Codemagic
-- Check that the `ios_code_signing` group exists in environment variables
-- Verify your Apple ID credentials are correct
+**Error messages you might see:**
+- `Failed to set code signing settings for ios/Runner.xcodeproj`
+- `Searching for files matching .../*.mobileprovision` (and finding nothing)
+- `List available code signing certificates in keychain` (and finding nothing)
+
+**Solutions (try in order):**
+
+1. **Verify Environment Variables:**
+   - Go to Codemagic dashboard → Your app → Environment variables
+   - Make sure `APPLE_ID`, `APPLE_ID_PASSWORD`, and `APP_ID` are set
+   - Check that `APP_ID` matches your bundle identifier in `ios/Runner/Info.plist`
+
+2. **Check Apple ID Credentials:**
+   - Verify your Apple ID email is correct
+   - If you have 2FA, use an **App-Specific Password** (not your regular password)
+   - Create one at: https://appleid.apple.com/ → Security → App-Specific Passwords
+
+3. **Use Codemagic's Built-in Code Signing:**
+   - Go to your app → **"Code signing"** section
+   - Click **"Add credentials"** or **"Add Apple ID"**
+   - Enter your Apple ID directly in the Code signing section (this is easier than environment variables)
+   - Codemagic will handle the rest automatically
+
+4. **Verify Bundle Identifier:**
+   - Check `ios/Runner/Info.plist` for `CFBundleIdentifier`
+   - Make sure it matches the `APP_ID` environment variable
+   - It should be in format: `com.yourname.appname`
+
+5. **Check Build Logs:**
+   - Look at the full build log in Codemagic
+   - Search for "code signing" errors
+   - The logs will show exactly what's missing
+
+6. **Try Manual Code Signing Setup:**
+   - If automatic signing keeps failing, you may need to:
+     - Get a paid Apple Developer account ($99/year)
+     - Export certificates and provisioning profiles manually
+     - Upload them to Codemagic
+   - See: https://docs.codemagic.io/code-signing/ios-code-signing/
 
 ### Build Fails: "CocoaPods error"
 

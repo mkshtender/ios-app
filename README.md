@@ -138,5 +138,6 @@ For iOS builds on Windows, use:
 - [Dart Documentation](https://dart.dev/guides)
 - [iOS App Development Guide](https://flutter.dev/docs/deployment/ios)
 - [Codemagic Setup Guide](CODEMAGIC_SETUP.md) - How to set up CI/CD for iOS builds
+- [Code Signing Quick Fix](CODEMAGIC_CODE_SIGNING_FIX.md) - Fix code signing errors quickly
 - [iOS Device Deployment](IOS_DEVICE_DEPLOYMENT.md) - Installing apps on your iPhone
 

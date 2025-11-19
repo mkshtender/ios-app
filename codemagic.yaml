@@ -4,11 +4,12 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2  # Mac Mini M2 (default instance type)
     environment:
-      groups:
-        - ios_code_signing  # Configure this in Codemagic dashboard (see CODEMAGIC_SETUP.md)
       flutter: stable
       xcode: latest
       cocoapods: default
+      vars:
+        APPLE_ID: $APPLE_ID  # Set in Codemagic environment variables
+        APPLE_ID_PASSWORD: $APPLE_ID_PASSWORD  # Set in Codemagic environment variables
     cache:
       cache_paths:
         - ~/.pub-cache
@@ -35,7 +36,27 @@ workflows:
           cd ..
       - name: Set up code signing settings on Xcode project
         script: |
+          # Verify Apple ID credentials are set
+          if [ -z "$APPLE_ID" ] || [ -z "$APPLE_ID_PASSWORD" ]; then
+            echo "Error: APPLE_ID or APPLE_ID_PASSWORD environment variables are not set"
+            echo "Please add them in Codemagic dashboard: Teams → Environment variables"
+            exit 1
+          fi
+          
+          echo "Setting up code signing with Apple ID: $APPLE_ID"
+          
+          # Automatic code signing with Apple ID from environment variables
           xcode-project use-profiles
+          
+          # Verify code signing was set up successfully
+          if [ $? -ne 0 ]; then
+            echo "Warning: Automatic code signing setup failed"
+            echo "Please verify your Apple ID credentials are correct"
+            echo "If you have 2FA enabled, use an App-Specific Password"
+            exit 1
+          fi
+          
+          echo "Code signing configured successfully"
       - name: Build ipa for distribution
         script: |
           flutter build ipa --release
