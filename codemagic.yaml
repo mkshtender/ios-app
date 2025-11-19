@@ -2,7 +2,7 @@ workflows:
   ios-workflow:
     name: iOS Workflow
     max_build_duration: 120
-    instance_type: mac_mini  # Use mac_mini for free tier, or mac_mini_m2 for paid
+    instance_type: mac_mini_m2  # Mac Mini M2 (default instance type)
     environment:
       groups:
         - ios_code_signing  # Configure this in Codemagic dashboard (see CODEMAGIC_SETUP.md)

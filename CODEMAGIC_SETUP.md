@@ -100,10 +100,9 @@ triggering:
 
 ### Update Instance Type
 
-The default uses `mac_mini_m2`. You can change to:
-- `mac_mini_m2` (default, good performance)
-- `mac_mini` (slower, but available on free tier)
-- `mac_pro` (fastest, paid)
+The default uses `mac_mini_m2` (Mac Mini M2). This is the default instance type as of September 2024. You can change to:
+- `mac_mini_m2` (default, Mac Mini M2 - good performance)
+- `mac_pro` (Mac Pro - fastest, paid tier)
 
 ## Step 5: Push Your Code
 
