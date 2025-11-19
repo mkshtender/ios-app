@@ -46,10 +46,11 @@ Use a service that can build AND deploy to your device:
 **Steps:**
 1. Sign up at https://codemagic.io/
 2. Connect your Git repository
-3. Configure iOS build settings
-4. Build your app
-5. Download the .ipa file
-6. Install on your iPhone using:
+3. Configure iOS build settings (see [CODEMAGIC_SETUP.md](CODEMAGIC_SETUP.md))
+4. The `codemagic.yaml` file in your repository will automatically configure builds
+5. Push your code - Codemagic builds automatically
+6. Download the .ipa file from Codemagic dashboard
+7. Install on your iPhone using:
    - **TestFlight** (if you have Apple Developer account)
    - **AltStore** or **Sideloadly** (for personal use, requires signing)
 
