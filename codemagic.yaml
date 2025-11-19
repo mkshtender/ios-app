@@ -32,6 +32,29 @@ workflows:
       - name: Get Flutter dependencies
         script: |
           flutter pub get
+      - name: Generate iOS project files
+        script: |
+          # Check if project.pbxproj exists
+          if [ ! -f "ios/Runner.xcodeproj/project.pbxproj" ]; then
+            echo "project.pbxproj is missing. Generating iOS project files..."
+            # Generate iOS platform files (won't overwrite existing files)
+            flutter create . --platforms=ios --org com.example
+            echo "✓ Flutter create completed"
+          else
+            echo "✓ project.pbxproj already exists"
+          fi
+          
+          # Verify the project file was created
+          if [ ! -f "ios/Runner.xcodeproj/project.pbxproj" ]; then
+            echo "Error: project.pbxproj is still missing"
+            echo "Listing ios directory contents:"
+            ls -la ios/ || true
+            echo "Listing Runner.xcodeproj contents:"
+            ls -la ios/Runner.xcodeproj/ || true
+            exit 1
+          fi
+          
+          echo "✓ Verified: ios/Runner.xcodeproj/project.pbxproj exists"
       - name: Install CocoaPods dependencies
         script: |
           cd ios
